@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Akademik - Prodi Administrasi Perkantoran</title>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #eef2ff;
+            --secondary: #6366f1;
+            --accent: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        .sidebar-item { transition: all 0.2s; }
+        .sidebar-item:hover, .sidebar-item.active { 
+            background: linear-gradient(135deg, rgba(79,70,229,0.1) 0%, rgba(99,102,241,0.1) 100%);
+            color: #4f46e5; 
+            border-left: 3px solid #4f46e5;
+        }
+        .sidebar-item.active {
+            background: linear-gradient(135deg, rgba(79,70,229,0.15) 0%, rgba(99,102,241,0.15) 100%);
+            font-weight: 600;
+        }
+        .card-stat { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-stat:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(79,70,229,0.15); }
+        .fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #eef2ff; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 3px; }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            background: #eef2ff;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 12px;
+            color: #4338ca;
+            border-bottom: 2px solid #c7d2fe;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e7ff;
+            font-size: 14px;
+        }
+        .data-table tr:hover td { background: #f8faff; }
+        
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-lulus { background: #d1fae5; color: #065f46; }
+        .badge-tidak-lulus { background: #fee2e2; color: #991b1b; }
+        .badge-aktif { background: #dbeafe; color: #1e40af; }
+        .badge-cut { background: #fef3c7; color: #92400e; }
+        
+        .btn-action {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-delete { background: #fee2e2; color: #e11d48; }
+        .btn-delete:hover { background: #fecdd3; }
+        .btn-edit { background: #dbeafe; color: #1e40af; }
+        .btn-edit:hover { background: #bfdbfe; }
+        
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+        
+        .gradient-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .semester-tab {
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 14px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        .semester-tab:hover {
+            background: #e2e8f0;
+        }
+        .semester-tab.active {
+            background: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+        }
+        
+        .nilai-input {
+            width: 70px;
+            padding: 4px 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+        .nilai-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        .nilai-input[readonly] {
+            background: #f1f5f9;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="h-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-800 overflow-hidden">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="h-full flex items-center justify-center bg-gradient-to-br from-indigo-600 via-indigo-500 to-blue-700">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 fade-in">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i data-lucide="graduation-cap" class="w-8 h-8 text-indigo-600"></i>
+                </div>
+                <h1 class="text-xl font-bold text-slate-800">Sistem Akademik</h1>
+                <p class="text-sm text-indigo-600 mt-1 font-medium">Prodi Administrasi Perkantoran</p>
+                <p class="text-xs text-slate-400 mt-1">Universitas Negeri Malang</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Username</label>
+                    <input id="username" type="text" value="admin" class="w-full px-4 py-2.5 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Password</label>
+                    <input id="password" type="password" value="admin123" class="w-full px-4 py-2.5 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-indigo-500 text-white py-2.5 rounded-lg font-semibold hover:from-indigo-700 hover:to-indigo-600 transition shadow-md">
+                    <i data-lucide="log-in" class="w-4 h-4 inline mr-2"></i> Masuk
+                </button>
+                <p class="text-xs text-center text-slate-400">Demo: admin / admin123</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="h-full flex hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-indigo-100 flex flex-col h-full shrink-0 shadow-lg z-10">
+            <div class="p-5 border-b border-indigo-100">
+                <h2 class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-transparent">SIAKAD</h2>
+                <p class="text-xs text-indigo-400 mt-0.5 font-medium">Prodi Administrasi Perkantoran</p>
+            </div>
+            <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+                <div class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+                </div>
+                <p class="text-xs text-indigo-400 uppercase tracking-wider px-3 pt-4 pb-1 font-semibold">Data Master</p>
+                <div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="mahasiswa">
+                    <i data-lucide="users" class="w-4 h-4"></i> Mahasiswa
+                </div>
+                <div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="dosen">
+                    <i data-lucide="user-round" class="w-4 h-4"></i> Dosen
+                </div>
+                <div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="staf">
+                    <i data-lucide="user-cog" class="w-4 h-4"></i> Staf
+                </div>
+                <div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="matkul">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> Mata Kuliah
+                </div>
+                <p class="text-xs text-indigo-400 uppercase tracking-wider px-3 pt-4 pb-1 font-semibold">Akademik</p>
+                <div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="nilai">
+                    <i data-lucide="clipboard-check" class="w-4 h-4"></i> Input Nilai
+                </div>
+                <div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="transkrip">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Transkrip Nilai
+                </div>
+                <p class="text-xs text-indigo-400 uppercase tracking-wider px-3 pt-4 pb-1 font-semibold">Pelaporan</p>
+                <div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition" data-page="lap-nilai">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Laporan Nilai
+                </div>
+            </nav>
+            <div class="p-3 border-t border-indigo-100">
+                <button id="btn-logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50 rounded-lg transition font-medium">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden">
+            <header class="bg-white/80 backdrop-blur-sm border-b border-indigo-100 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm">
+                <h1 id="page-title" class="text-lg font-bold text-slate-800">Dashboard</h1>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-slate-500">Admin Akademik</span>
+                    <div class="w-8 h-8 bg-gradient-to-r from-indigo-100 to-blue-100 rounded-full flex items-center justify-center shadow-md">
+                        <i data-lucide="user" class="w-4 h-4 text-indigo-600"></i>
+                    </div>
+                </div>
+            </header>
+            <div id="content-area" class="flex-1 overflow-y-auto p-6">
+                <!-- Dynamic content -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Data Store
+        let allData = [];
+        let currentPage = 'dashboard';
+        let selectedMahasiswa = null;
+        let nilaiChart = null;
+        let ipsChart = null;
+
+        function getByType(type) { return allData.filter(d => d.type === type); }
+        function getById(id) { return allData.find(d => d.__backendId === id); }
+        function formatRp(n) { return 'Rp ' + (n || 0).toLocaleString('id-ID'); }
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        // Inisialisasi Data
+        function initData() {
+            if (localStorage.getItem('siakadData')) {
+                allData = JSON.parse(localStorage.getItem('siakadData'));
+                return;
+            }
+            
+            allData = [
+                // Dosen
+                { type: 'dosen', nidn: 'D001', name: 'Dr. Siti Rahayu, M.Pd', bidang: 'Manajemen Perkantoran', email: 'siti.rahayu@um.ac.id', __backendId: 'dsn1' },
+                { type: 'dosen', nidn: 'D002', name: 'Prof. Budi Santoso, M.Si', bidang: 'Administrasi Publik', email: 'budi.santoso@um.ac.id', __backendId: 'dsn2' },
+                { type: 'dosen', nidn: 'D003', name: 'Dr. Rina Kusuma, M.M', bidang: 'Kearsipan', email: 'rina.kusuma@um.ac.id', __backendId: 'dsn3' },
+                { type: 'dosen', nidn: 'D004', name: 'Dr. Ahmad Wijaya, M.Pd', bidang: 'Kesekretariatan', email: 'ahmad.wijaya@um.ac.id', __backendId: 'dsn4' },
+                { type: 'dosen', nidn: 'D005', name: 'Prof. Dewi Cahyanti, M.Si', bidang: 'ETIK', email: 'dewi.cahyanti@um.ac.id', __backendId: 'dsn5' },
+                
+                // Staf
+                { type: 'staf', nip: 'S001', name: 'Rudi Hartono', jabatan: 'Kepala Tata Usaha', email: 'rudi.hartono@um.ac.id', __backendId: 'stf1' },
+                { type: 'staf', nip: 'S002', name: 'Lina Marlina', jabatan: 'Staf Administrasi', email: 'lina.marlina@um.ac.id', __backendId: 'stf2' },
+                { type: 'staf', nip: 'S003', name: 'Andi Saputra', jabatan: 'Staf Akademik', email: 'andi.saputra@um.ac.id', __backendId: 'stf3' },
+                { type: 'staf', nip: 'S004', name: 'Nadia Putri', jabatan: 'Staf Kemahasiswaan', email: 'nadia.putri@um.ac.id', __backendId: 'stf4' },
+                
+                // Mata Kuliah
+                { type: 'matkul', kode: 'AKB101', name: 'Pengantar Administrasi Perkantoran', sks: 3, semester: 1, __backendId: 'mk1' },
+                { type: 'matkul', kode: 'AKB102', name: 'Manajemen Kearsipan', sks: 3, semester: 1, __backendId: 'mk2' },
+                { type: 'matkul', kode: 'AKB103', name: 'Komunikasi Bisnis', sks: 2, semester: 1, __backendId: 'mk3' },
+                { type: 'matkul', kode: 'AKB104', name: 'Etika Profesi', sks: 2, semester: 1, __backendId: 'mk4' },
+                { type: 'matkul', kode: 'AKB201', name: 'Manajemen Perkantoran', sks: 3, semester: 2, __backendId: 'mk5' },
+                { type: 'matkul', kode: 'AKB202', name: 'Kesekretariatan', sks: 3, semester: 2, __backendId: 'mk6' },
+                { type: 'matkul', kode: 'AKB203', name: 'Administrasi Publik', sks: 2, semester: 2, __backendId: 'mk7' },
+                { type: 'matkul', kode: 'AKB301', name: 'Manajemen Keuangan', sks: 3, semester: 3, __backendId: 'mk8' },
+                { type: 'matkul', kode: 'AKB302', name: 'Sistem Informasi Manajemen', sks: 3, semester: 3, __backendId: 'mk9' },
+                { type: 'matkul', kode: 'AKB303', name: 'Kewirausahaan', sks: 2, semester: 3, __backendId: 'mk10' },
+                { type: 'matkul', kode: 'AKB401', name: 'Manajemen Strategis', sks: 3, semester: 4, __backendId: 'mk11' },
+                { type: 'matkul', kode: 'AKB402', name: 'Penelitian Administrasi', sks: 3, semester: 4, __backendId: 'mk12' },
+                
+                // Mahasiswa
+                { type: 'mahasiswa', nim: '22010101', name: 'Ayu Andini', semester: 1, status: 'aktif', angkatan: '2022', __backendId: 'mhs1' },
+                { type: 'mahasiswa', nim: '22010102', name: 'Bima Sakti', semester: 1, status: 'aktif', angkatan: '2022', __backendId: 'mhs2' },
+                { type: 'mahasiswa', nim: '22010103', name: 'Citra Dewi', semester: 2, status: 'aktif', angkatan: '2022', __backendId: 'mhs3' },
+                { type: 'mahasiswa', nim: '22010104', name: 'Dian Pratama', semester: 2, status: 'aktif', angkatan: '2022', __backendId: 'mhs4' },
+                { type: 'mahasiswa', nim: '22010105', name: 'Eka Wulandari', semester: 3, status: 'aktif', angkatan: '2022', __backendId: 'mhs5' },
+                { type: 'mahasiswa', nim: '22010106', name: 'Fajar Rizki', semester: 3, status: 'aktif', angkatan: '2022', __backendId: 'mhs6' },
+                { type: 'mahasiswa', nim: '22010107', name: 'Gita Maharani', semester: 4, status: 'aktif', angkatan: '2021', __backendId: 'mhs7' },
+                { type: 'mahasiswa', nim: '22010108', name: 'Hendra Kusuma', semester: 4, status: 'aktif', angkatan: '2021', __backendId: 'mhs8' },
+                { type: 'mahasiswa', nim: '22010109', name: 'Indah Cahyani', semester: 1, status: 'aktif', angkatan: '2023', __backendId: 'mhs9' },
+                { type: 'mahasiswa', nim: '22010110', name: 'Joko Santoso', semester: 1, status: 'aktif', angkatan: '2023', __backendId: 'mhs10' },
+                
+                // Nilai Awal - Beberapa contoh nilai untuk mahasiswa
+                { type: 'nilai', mahasiswaId: 'mhs1', matkulId: 'mk1', tugas: 80, praktik: 85, uts: 75, uas: 80, absen: 90, semester: 1, __backendId: 'nil1' },
+                { type: 'nilai', mahasiswaId: 'mhs1', matkulId: 'mk2', tugas: 85, praktik: 80, uts: 80, uas: 85, absen: 95, semester: 1, __backendId: 'nil2' },
+                { type: 'nilai', mahasiswaId: 'mhs2', matkulId: 'mk1', tugas: 70, praktik: 75, uts: 80, uas: 75, absen: 85, semester: 1, __backendId: 'nil3' },
+                { type: 'nilai', mahasiswaId: 'mhs2', matkulId: 'mk2', tugas: 75, praktik: 70, uts: 75, uas: 80, absen: 90, semester: 1, __backendId: 'nil4' },
+                { type: 'nilai', mahasiswaId: 'mhs3', matkulId: 'mk5', tugas: 85, praktik: 90, uts: 85, uas: 90, absen: 95, semester: 2, __backendId: 'nil5' },
+                { type: 'nilai', mahasiswaId: 'mhs3', matkulId: 'mk6', tugas: 80, praktik: 85, uts: 75, uas: 80, absen: 90, semester: 2, __backendId: 'nil6' },
+            ];
+            
+            // Generate IPK dan IPS otomatis
+            calculateAllIP();
+            
+            localStorage.setItem('siakadData', JSON.stringify(allData));
+        }
+
+        // Fungsi menghitung Nilai Akhir, IP, IPK
+        function calculateNilaiAkhir(nilai) {
+            return (nilai.tugas * 0.20) + (nilai.praktik * 0.25) + (nilai.uts * 0.20) + (nilai.uas * 0.30) + (nilai.absen * 0.05);
+        }
+
+        function getGrade(nilai) {
+            if (nilai >= 85) return { grade: 'A', bobot: 4.0 };
+            if (nilai >= 75) return { grade: 'B', bobot: 3.0 };
+            if (nilai >= 65) return { grade: 'C', bobot: 2.0 };
+            if (nilai >= 50) return { grade: 'D', bobot: 1.0 };
+            return { grade: 'E', bobot: 0.0 };
+        }
+
+        function getStatusLulus(nilai) {
+            return nilai >= 65 ? 'Lulus' : 'Tidak Lulus';
+        }
+
+        function calculateIP(mahasiswaId, semester) {
+            const nilaiList = allData.filter(n => n.type === 'nilai' && n.mahasiswaId === mahasiswaId && n.semester === semester);
+            if (nilaiList.length === 0) return { ip: 0, totalSks: 0, totalBobot: 0 };
+            
+            let totalBobot = 0;
+            let totalSks = 0;
+            
+            for (const n of nilaiList) {
+                const matkul = getById(n.matkulId);
+                if (matkul) {
+                    const nilaiAkhir = calculateNilaiAkhir(n);
+                    const grade = getGrade(nilaiAkhir);
+                    totalBobot += grade.bobot * matkul.sks;
+                    totalSks += matkul.sks;
+                }
+            }
+            
+            return { ip: totalSks > 0 ? totalBobot / totalSks : 0, totalSks, totalBobot };
+        }
+
+        function calculateIPK(mahasiswaId) {
+            const nilaiList = allData.filter(n => n.type === 'nilai' && n.mahasiswaId === mahasiswaId);
+            if (nilaiList.length === 0) return { ipk: 0, totalSks: 0, totalBobot: 0 };
+            
+            let totalBobot = 0;
+            let totalSks = 0;
+            
+            for (const n of nilaiList) {
+                const matkul = getById(n.matkulId);
+                if (matkul) {
+                    const nilaiAkhir = calculateNilaiAkhir(n);
+                    const grade = getGrade(nilaiAkhir);
+                    totalBobot += grade.bobot * matkul.sks;
+                    totalSks += matkul.sks;
+                }
+            }
+            
+            return { ipk: totalSks > 0 ? totalBobot / totalSks : 0, totalSks, totalBobot };
+        }
+
+        function calculateAllIP() {
+            const mahasiswaList = getByType('mahasiswa');
+            for (const mhs of mahasiswaList) {
+                // Hitung IPS per semester
+                const semesters = [1, 2, 3, 4];
+                let semesterData = [];
+                let totalSemesterSks = 0;
+                let totalSemesterBobot = 0;
+                
+                for (const sem of semesters) {
+                    const result = calculateIP(mhs.__backendId, sem);
+                    if (result.totalSks > 0) {
+                        semesterData.push({ semester: sem, ip: result.ip, sks: result.totalSks });
+                        totalSemesterSks += result.totalSks;
+                        totalSemesterBobot += result.totalBobot;
+                    }
+                }
+                
+                // Hitung IPK
+                const ipkData = calculateIPK(mhs.__backendId);
+                
+                // Simpan data IP ke mahasiswa
+                mhs.semesterData = semesterData;
+                mhs.ipk = ipkData.ipk;
+                mhs.totalSks = ipkData.totalSks;
+                
+                // Tentukan status kelulusan (minimal 144 SKS dan IPK >= 2.0)
+                mhs.statusKelulusan = (mhs.totalSks >= 144 && mhs.ipk >= 2.0) ? 'Lulus' : 'Belum Lulus';
+            }
+        }
+
+        async function createRecord(data) {
+            const newRecord = { ...data, __backendId: Date.now() + '-' + Math.random() };
+            allData.push(newRecord);
+            calculateAllIP();
+            localStorage.setItem('siakadData', JSON.stringify(allData));
+            return newRecord;
+        }
+
+        async function deleteRecord(record) {
+            const index = allData.findIndex(d => d.__backendId === record.__backendId);
+            if (index !== -1) {
+                // Hapus juga nilai terkait jika menghapus mahasiswa
+                if (record.type === 'mahasiswa') {
+                    const nilaiList = allData.filter(n => n.type === 'nilai' && n.mahasiswaId === record.__backendId);
+                    for (const n of nilaiList) {
+                        const idx = allData.findIndex(d => d.__backendId === n.__backendId);
+                        if (idx !== -1) allData.splice(idx, 1);
+                    }
+                }
+                allData.splice(index, 1);
+                calculateAllIP();
+                localStorage.setItem('siakadData', JSON.stringify(allData));
+            }
+        }
+
+        async function updateRecord(record, newData) {
+            const index = allData.findIndex(d => d.__backendId === record.__backendId);
+            if (index !== -1) {
+                allData[index] = { ...allData[index], ...newData };
+                calculateAllIP();
+                localStorage.setItem('siakadData', JSON.stringify(allData));
+            }
+        }
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            initData();
+            if (u === 'admin' && p === 'admin123') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                renderDashboard();
+                lucide.createIcons();
+            } else {
+                alert('Username atau password salah!');
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        });
+
+        // Navigation
+        document.querySelectorAll('.sidebar-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentPage = item.dataset.page;
+                document.getElementById('page-title').textContent = item.textContent.trim();
+                renderPage(currentPage);
+                lucide.createIcons();
+            });
+        });
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white text-sm z-50 fade-in';
+            toast.style.background = isError ? '#ef4444' : '#4f46e5';
+            toast.innerHTML = `<i data-lucide="${isError ? 'alert-circle' : 'check-circle'}" class="w-4 h-4 inline mr-2"></i>${message}`;
+            document.body.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const mahasiswa = getByType('mahasiswa');
+            const dosen = getByType('dosen');
+            const staf = getByType('staf');
+            const matkul = getByType('matkul');
+            const nilai = getByType('nilai');
+            const lulus = mahasiswa.filter(m => m.statusKelulusan === 'Lulus').length;
+            const belumLulus = mahasiswa.filter(m => m.statusKelulusan === 'Belum Lulus').length;
+            
+            const content = document.getElementById('content-area');
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 mb-6">
+                        <div class="card-stat gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-slate-500">Mahasiswa</p><p class="stat-number text-3xl mt-1">${mahasiswa.length}</p></div>
+                                <div class="w-10 h-10 bg-gradient-to-r from-indigo-100 to-blue-100 rounded-lg flex items-center justify-center"><i data-lucide="users" class="w-5 h-5 text-indigo-600"></i></div>
+                            </div>
+                        </div>
+                        <div class="card-stat gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-slate-500">Dosen</p><p class="stat-number text-3xl mt-1">${dosen.length}</p></div>
+                                <div class="w-10 h-10 bg-gradient-to-r from-green-100 to-green-200 rounded-lg flex items-center justify-center"><i data-lucide="user-round" class="w-5 h-5 text-green-600"></i></div>
+                            </div>
+                        </div>
+                        <div class="card-stat gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-slate-500">Staf</p><p class="stat-number text-3xl mt-1">${staf.length}</p></div>
+                                <div class="w-10 h-10 bg-gradient-to-r from-amber-100 to-amber-200 rounded-lg flex items-center justify-center"><i data-lucide="user-cog" class="w-5 h-5 text-amber-600"></i></div>
+                            </div>
+                        </div>
+                        <div class="card-stat gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-slate-500">Mata Kuliah</p><p class="stat-number text-3xl mt-1">${matkul.length}</p></div>
+                                <div class="w-10 h-10 bg-gradient-to-r from-purple-100 to-purple-200 rounded-lg flex items-center justify-center"><i data-lucide="book-open" class="w-5 h-5 text-purple-600"></i></div>
+                            </div>
+                        </div>
+                        <div class="card-stat gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-slate-500">Data Nilai</p><p class="stat-number text-3xl mt-1">${nilai.length}</p></div>
+                                <div class="w-10 h-10 bg-gradient-to-r from-rose-100 to-rose-200 rounded-lg flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5 text-rose-600"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-600"></i>
+                                Status Kelulusan Mahasiswa
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 text-center border border-green-200">
+                                    <p class="text-3xl font-bold text-green-700">${lulus}</p>
+                                    <p class="text-xs text-green-600 mt-1">Sudah Lulus</p>
+                                </div>
+                                <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl p-4 text-center border border-yellow-200">
+                                    <p class="text-3xl font-bold text-yellow-700">${belumLulus}</p>
+                                    <p class="text-xs text-yellow-600 mt-1">Belum Lulus</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-xs text-slate-400 text-center">
+                                <i data-lucide="info" class="w-3 h-3 inline"></i> 
+                                Minimal 144 SKS dan IPK ≥ 2.0
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-600"></i>
+                                Distribusi Mahasiswa per Semester
+                            </h3>
+                            <div class="space-y-3">
+                                ${[1,2,3,4].map(sem => {
+                                    const count = mahasiswa.filter(m => m.semester === sem).length;
+                                    const percent = mahasiswa.length > 0 ? Math.round((count / mahasiswa.length) * 100) : 0;
+                                    return `<div class="flex items-center gap-3">
+                                        <div class="w-24"><p class="text-sm text-slate-600">Semester ${sem}</p></div>
+                                        <div class="flex-1">
+                                            <div class="bg-indigo-100 rounded-full h-2 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all" style="width:${percent}%"></div>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm font-medium text-slate-700 w-12 text-right">${count}</p>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <h3 class="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                            <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
+                            Daftar Mahasiswa
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead><tr><th>No</th><th>NIM</th><th>Nama</th><th>Semester</th><th>Angkatan</th><th>IPK</th><th>SKS</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    ${mahasiswa.slice(0,8).map((m, i) => `
+                                        <tr>
+                                            <td class="text-center">${i+1}</td>
+                                            <td><span class="font-mono text-xs bg-indigo-50 px-2 py-1 rounded">${m.nim}</span></td>
+                                            <td class="font-medium">${m.name}</td>
+                                            <td>${m.semester}</td>
+                                            <td>${m.angkatan}</td>
+                                            <td class="font-semibold text-indigo-600">${m.ipk ? m.ipk.toFixed(2) : '0.00'}</td>
+                                            <td>${m.totalSks || 0}</td>
+                                            <td><span class="badge-status ${m.statusKelulusan === 'Lulus' ? 'badge-lulus' : 'badge-tidak-lulus'}">${m.statusKelulusan}</span></td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${mahasiswa.length > 8 ? `<p class="text-xs text-slate-400 mt-3 text-center">Menampilkan 8 dari ${mahasiswa.length} mahasiswa</p>` : ''}
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Render Mahasiswa
+        function renderMahasiswa() {
+            const data = getByType('mahasiswa');
+            const content = document.getElementById('content-area');
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm mb-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Tambah Mahasiswa</h3>
+                        <form id="form-mahasiswa" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                            <input id="nim" placeholder="NIM" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="nama" placeholder="Nama Lengkap" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <select id="semester" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                                <option value="1">Semester 1</option><option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option><option value="4">Semester 4</option>
+                            </select>
+                            <input id="angkatan" placeholder="Angkatan" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <button type="submit" class="bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Simpan</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <h3 class="font-semibold mb-3">📋 Data Mahasiswa (${data.length})</h3>
+                        <div class="overflow-x-auto"><table class="data-table"><thead><tr><th>No</th><th>NIM</th><th>Nama</th><th>Semester</th><th>Angkatan</th><th>IPK</th><th>Status</th><th>Aksi</th></tr></thead>
+                        <tbody>${data.map((m, i) => `<tr><td>${i+1}</td><td>${m.nim}</td><td class="font-medium">${m.name}</td><td>${m.semester}</td><td>${m.angkatan}</td><td class="font-semibold text-indigo-600">${m.ipk ? m.ipk.toFixed(2) : '0.00'}</td>
+                        <td><span class="badge-status ${m.statusKelulusan === 'Lulus' ? 'badge-lulus' : 'badge-tidak-lulus'}">${m.statusKelulusan}</span></td>
+                        <td><button class="btn-action btn-delete" onclick="deleteItem('${m.__backendId}')">Hapus</button></td></tr>`).join('')}</tbody></table></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('form-mahasiswa').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createRecord({ type: 'mahasiswa', nim: document.getElementById('nim').value, name: document.getElementById('nama').value, semester: Number(document.getElementById('semester').value), angkatan: document.getElementById('angkatan').value, status: 'aktif' });
+                showToast('Mahasiswa ditambahkan!'); renderPage('mahasiswa');
+            });
+        }
+
+        // Render Dosen
+        function renderDosen() {
+            const data = getByType('dosen');
+            const content = document.getElementById('content-area');
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm mb-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Tambah Dosen</h3>
+                        <form id="form-dosen" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <input id="nidn" placeholder="NIDN" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="nama_dosen" placeholder="Nama Lengkap" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="bidang" placeholder="Bidang" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="email_dosen" placeholder="Email" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <button type="submit" class="bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Simpan</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <h3 class="font-semibold mb-3">📋 Data Dosen (${data.length})</h3>
+                        <div class="overflow-x-auto"><table class="data-table"><thead><tr><th>NIDN</th><th>Nama</th><th>Bidang</th><th>Email</th><th>Aksi</th></tr></thead>
+                        <tbody>${data.map(d => `<tr><td>${d.nidn}</td><td class="font-medium">${d.name}</td><td>${d.bidang}</td><td class="text-sm text-slate-500">${d.email}</td><td><button class="btn-action btn-delete" onclick="deleteItem('${d.__backendId}')">Hapus</button></td></tr>`).join('')}</tbody></table></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('form-dosen').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createRecord({ type: 'dosen', nidn: document.getElementById('nidn').value, name: document.getElementById('nama_dosen').value, bidang: document.getElementById('bidang').value, email: document.getElementById('email_dosen').value });
+                showToast('Dosen ditambahkan!'); renderPage('dosen');
+            });
+        }
+
+        // Render Staf
+        function renderStaf() {
+            const data = getByType('staf');
+            const content = document.getElementById('content-area');
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm mb-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Tambah Staf</h3>
+                        <form id="form-staf" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <input id="nip" placeholder="NIP" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="nama_staf" placeholder="Nama Lengkap" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="jabatan" placeholder="Jabatan" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="email_staf" placeholder="Email" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <button type="submit" class="bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Simpan</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <h3 class="font-semibold mb-3">📋 Data Staf (${data.length})</h3>
+                        <div class="overflow-x-auto"><table class="data-table"><thead><tr><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Email</th><th>Aksi</th></tr></thead>
+                        <tbody>${data.map(d => `<tr><td>${d.nip}</td><td class="font-medium">${d.name}</td><td>${d.jabatan}</td><td class="text-sm text-slate-500">${d.email}</td><td><button class="btn-action btn-delete" onclick="deleteItem('${d.__backendId}')">Hapus</button></td></tr>`).join('')}</tbody></table></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('form-staf').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createRecord({ type: 'staf', nip: document.getElementById('nip').value, name: document.getElementById('nama_staf').value, jabatan: document.getElementById('jabatan').value, email: document.getElementById('email_staf').value });
+                showToast('Staf ditambahkan!'); renderPage('staf');
+            });
+        }
+
+        // Render Mata Kuliah
+        function renderMatkul() {
+            const data = getByType('matkul');
+            const content = document.getElementById('content-area');
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm mb-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2"><i data-lucide="book-plus" class="w-5 h-5 text-indigo-600"></i> Tambah Mata Kuliah</h3>
+                        <form id="form-matkul" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <input id="kode" placeholder="Kode MK" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="nama_matkul" placeholder="Nama Mata Kuliah" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <input id="sks" type="number" placeholder="SKS" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                            <select id="semester_matkul" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                                <option value="1">Semester 1</option><option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option><option value="4">Semester 4</option>
+                            </select>
+                            <button type="submit" class="bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Simpan</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <h3 class="font-semibold mb-3">📋 Data Mata Kuliah (${data.length})</h3>
+                        <div class="overflow-x-auto"><table class="data-table"><thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead>
+                        <tbody>${data.map(m => `<tr><td>${m.kode}</td><td class="font-medium">${m.name}</td><td>${m.sks}</td><td>${m.semester}</td><td><button class="btn-action btn-delete" onclick="deleteItem('${m.__backendId}')">Hapus</button></td></tr>`).join('')}</tbody></table></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('form-matkul').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createRecord({ type: 'matkul', kode: document.getElementById('kode').value, name: document.getElementById('nama_matkul').value, sks: Number(document.getElementById('sks').value), semester: Number(document.getElementById('semester_matkul').value) });
+                showToast('Mata Kuliah ditambahkan!'); renderPage('matkul');
+            });
+        }
+
+        // Render Input Nilai
+        function renderNilai() {
+            const mahasiswa = getByType('mahasiswa');
+            const matkul = getByType('matkul');
+            const nilaiList = getByType('nilai');
+            const content = document.getElementById('content-area');
+            
+            // Group nilai by mahasiswa
+            const nilaiByMhs = {};
+            for (const n of nilaiList) {
+                if (!nilaiByMhs[n.mahasiswaId]) nilaiByMhs[n.mahasiswaId] = [];
+                nilaiByMhs[n.mahasiswaId].push(n);
+            }
+            
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm mb-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2"><i data-lucide="clipboard-edit" class="w-5 h-5 text-indigo-600"></i> Input Nilai Mahasiswa</h3>
+                        <form id="form-nilai" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                            <select id="pilih-mahasiswa" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                                <option value="">Pilih Mahasiswa</option>
+                                ${mahasiswa.map(m => `<option value="${m.__backendId}">${m.nim} - ${m.name}</option>`).join('')}
+                            </select>
+                            <select id="pilih-matkul" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                                <option value="">Pilih Mata Kuliah</option>
+                                ${matkul.map(m => `<option value="${m.__backendId}">${m.kode} - ${m.name} (${m.sks} SKS)</option>`).join('')}
+                            </select>
+                            <select id="pilih-semester" class="px-3 py-2 border border-indigo-200 rounded-lg text-sm">
+                                <option value="1">Semester 1</option><option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option><option value="4">Semester 4</option>
+                            </select>
+                        </form>
+                        
+                        <div id="nilai-form" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                            <div><label class="text-xs text-slate-500">Tugas (20%)</label><input id="n-tugas" type="number" min="0" max="100" value="80" class="nilai-input w-full"></div>
+                            <div><label class="text-xs text-slate-500">Praktik (25%)</label><input id="n-praktik" type="number" min="0" max="100" value="80" class="nilai-input w-full"></div>
+                            <div><label class="text-xs text-slate-500">UTS (20%)</label><input id="n-uts" type="number" min="0" max="100" value="80" class="nilai-input w-full"></div>
+                            <div><label class="text-xs text-slate-500">UAS (30%)</label><input id="n-uas" type="number" min="0" max="100" value="80" class="nilai-input w-full"></div>
+                            <div><label class="text-xs text-slate-500">Absen (5%)</label><input id="n-absen" type="number" min="0" max="100" value="85" class="nilai-input w-full"></div>
+                        </div>
+                        <button onclick="simpanNilai()" class="mt-3 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Simpan Nilai</button>
+                        <div id="nilai-result" class="mt-3"></div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <h3 class="font-semibold mb-3">📋 Data Nilai (${nilaiList.length})</h3>
+                        <div class="overflow-x-auto"><table class="data-table"><thead><tr><th>Mahasiswa</th><th>Mata Kuliah</th><th>Semester</th><th>Tugas</th><th>Praktik</th><th>UTS</th><th>UAS</th><th>Absen</th><th>NA</th><th>Grade</th><th>Status</th><th>Aksi</th></tr></thead>
+                        <tbody>${nilaiList.map(n => {
+                            const mhs = getById(n.mahasiswaId);
+                            const mk = getById(n.matkulId);
+                            const na = calculateNilaiAkhir(n);
+                            const grade = getGrade(na);
+                            const status = getStatusLulus(na);
+                            return `<tr><td>${mhs ? mhs.name : '-'}</td><td>${mk ? mk.name : '-'}</td><td>${n.semester}</td>
+                            <td>${n.tugas}</td><td>${n.praktik}</td><td>${n.uts}</td><td>${n.uas}</td><td>${n.absen}</td>
+                            <td class="font-semibold">${na.toFixed(1)}</td>
+                            <td><span class="badge-status ${grade.grade === 'A' ? 'badge-lulus' : 'badge-tidak-lulus'}">${grade.grade}</span></td>
+                            <td><span class="badge-status ${status === 'Lulus' ? 'badge-lulus' : 'badge-tidak-lulus'}">${status}</span></td>
+                            <td><button class="btn-action btn-delete" onclick="deleteItem('${n.__backendId}')">Hapus</button></td></tr>`;
+                        }).join('')}</tbody></table></div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Fungsi simpan nilai
+        window.simpanNilai = async function() {
+            const mahasiswaId = document.getElementById('pilih-mahasiswa').value;
+            const matkulId = document.getElementById('pilih-matkul').value;
+            const semester = Number(document.getElementById('pilih-semester').value);
+            
+            if (!mahasiswaId || !matkulId) {
+                showToast('Pilih mahasiswa dan mata kuliah!', true);
+                return;
+            }
+            
+            const tugas = Number(document.getElementById('n-tugas').value);
+            const praktik = Number(document.getElementById('n-praktik').value);
+            const uts = Number(document.getElementById('n-uts').value);
+            const uas = Number(document.getElementById('n-uas').value);
+            const absen = Number(document.getElementById('n-absen').value);
+            
+            // Cek apakah nilai sudah ada
+            const existing = allData.find(n => n.type === 'nilai' && n.mahasiswaId === mahasiswaId && n.matkulId === matkulId);
+            if (existing) {
+                if (!confirm('Nilai untuk mahasiswa dan mata kuliah ini sudah ada. Update?')) return;
+                await updateRecord(existing, { tugas, praktik, uts, uas, absen, semester });
+                showToast('Nilai berhasil diupdate!');
+            } else {
+                await createRecord({ type: 'nilai', mahasiswaId, matkulId, tugas, praktik, uts, uas, absen, semester });
+                showToast('Nilai berhasil disimpan!');
+            }
+            
+            renderPage('nilai');
+        };
+
+        // Render Transkrip Nilai
+        function renderTranskrip() {
+            const mahasiswa = getByType('mahasiswa');
+            const content = document.getElementById('content-area');
+            
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm mb-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5 text-indigo-600"></i> Transkrip Nilai Mahasiswa</h3>
+                        <select id="pilih-mhs-transkrip" class="w-full md:w-1/2 px-3 py-2 border border-indigo-200 rounded-lg text-sm" onchange="renderTranskripDetail()">
+                            <option value="">Pilih Mahasiswa</option>
+                            ${mahasiswa.map(m => `<option value="${m.__backendId}">${m.nim} - ${m.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div id="transkrip-detail" class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <p class="text-center text-slate-400">Pilih mahasiswa untuk melihat transkrip</p>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Fungsi render transkrip detail
+        window.renderTranskripDetail = function() {
+            const mhsId = document.getElementById('pilih-mhs-transkrip').value;
+            if (!mhsId) {
+                document.getElementById('transkrip-detail').innerHTML = '<p class="text-center text-slate-400">Pilih mahasiswa untuk melihat transkrip</p>';
+                return;
+            }
+            
+            const mhs = getById(mhsId);
+            if (!mhs) return;
+            
+            const nilaiList = allData.filter(n => n.type === 'nilai' && n.mahasiswaId === mhsId);
+            const matkulList = getByType('matkul');
+            
+            // Group by semester
+            const bySemester = {};
+            for (const n of nilaiList) {
+                const mk = getById(n.matkulId);
+                if (!bySemester[n.semester]) bySemester[n.semester] = [];
+                bySemester[n.semester].push({ ...n, matkul: mk });
+            }
+            
+            // Hitung IPS per semester dan IPK total
+            const ipkData = calculateIPK(mhsId);
+            
+            let html = `
+                <div class="mb-4">
+                    <h4 class="text-lg font-bold text-indigo-600">${mhs.name}</h4>
+                    <p class="text-sm text-slate-500">NIM: ${mhs.nim} | Semester: ${mhs.semester} | Angkatan: ${mhs.angkatan}</p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+                        <div class="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg text-center">
+                            <p class="text-sm text-slate-500">IPK</p>
+                            <p class="text-2xl font-bold text-green-700">${ipkData.ipk.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg text-center">
+                            <p class="text-sm text-slate-500">Total SKS</p>
+                            <p class="text-2xl font-bold text-blue-700">${ipkData.totalSks}</p>
+                        </div>
+                        <div class="bg-gradient-to-r from-amber-50 to-amber-100 p-3 rounded-lg text-center">
+                            <p class="text-sm text-slate-500">Status</p>
+                            <p class="text-lg font-bold ${mhs.statusKelulusan === 'Lulus' ? 'text-green-700' : 'text-amber-700'}">${mhs.statusKelulusan}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Tampilkan per semester
+            const semesters = Object.keys(bySemester).sort();
+            for (const sem of semesters) {
+                const items = bySemester[sem];
+                const ipData = calculateIP(mhsId, Number(sem));
+                
+                html += `
+                    <div class="mt-4 border-t border-indigo-100 pt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-semibold text-slate-700">Semester ${sem}</h5>
+                            <span class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-semibold">IPS: ${ipData.ip.toFixed(2)}</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead><tr><th>Kode</th><th>Mata Kuliah</th><th>SKS</th><th>Nilai</th><th>Grade</th><th>Bobot</th></tr></thead>
+                                <tbody>
+                                    ${items.map(item => {
+                                        const na = calculateNilaiAkhir(item);
+                                        const grade = getGrade(na);
+                                        return `<tr>
+                                            <td>${item.matkul ? item.matkul.kode : '-'}</td>
+                                            <td>${item.matkul ? item.matkul.name : '-'}</td>
+                                            <td>${item.matkul ? item.matkul.sks : 0}</td>
+                                            <td>${na.toFixed(1)}</td>
+                                            <td><span class="badge-status ${grade.grade === 'A' ? 'badge-lulus' : 'badge-tidak-lulus'}">${grade.grade}</span></td>
+                                            <td>${grade.bobot.toFixed(1)}</td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('transkrip-detail').innerHTML = html;
+            lucide.createIcons();
+        };
+
+        // Render Laporan Nilai
+        function renderLapNilai() {
+            const mahasiswa = getByType('mahasiswa');
+            const nilaiList = getByType('nilai');
+            const content = document.getElementById('content-area');
+            
+            // Hitung statistik nilai
+            const semuaNilai = nilaiList.map(n => calculateNilaiAkhir(n));
+            const rataRata = semuaNilai.length > 0 ? semuaNilai.reduce((a,b) => a+b, 0) / semuaNilai.length : 0;
+            const tertinggi = semuaNilai.length > 0 ? Math.max(...semuaNilai) : 0;
+            const terendah = semuaNilai.length > 0 ? Math.min(...semuaNilai) : 0;
+            const lulus = semuaNilai.filter(n => n >= 65).length;
+            const tidakLulus = semuaNilai.filter(n => n < 65).length;
+            
+            // Data untuk chart distribusi nilai
+            const ranges = [
+                { label: 'A (85-100)', count: 0 },
+                { label: 'B (75-84)', count: 0 },
+                { label: 'C (65-74)', count: 0 },
+                { label: 'D (50-64)', count: 0 },
+                { label: 'E (0-49)', count: 0 }
+            ];
+            for (const n of semuaNilai) {
+                if (n >= 85) ranges[0].count++;
+                else if (n >= 75) ranges[1].count++;
+                else if (n >= 65) ranges[2].count++;
+                else if (n >= 50) ranges[3].count++;
+                else ranges[4].count++;
+            }
+            
+            content.innerHTML = `
+                <div class="fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                        <div class="gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm text-center">
+                            <p class="text-sm text-slate-500">Rata-rata Nilai</p>
+                            <p class="text-2xl font-bold text-indigo-600">${rataRata.toFixed(1)}</p>
+                        </div>
+                        <div class="gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm text-center">
+                            <p class="text-sm text-slate-500">Nilai Tertinggi</p>
+                            <p class="text-2xl font-bold text-green-600">${tertinggi.toFixed(1)}</p>
+                        </div>
+                        <div class="gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm text-center">
+                            <p class="text-sm text-slate-500">Nilai Terendah</p>
+                            <p class="text-2xl font-bold text-red-600">${terendah.toFixed(1)}</p>
+                        </div>
+                        <div class="gradient-card rounded-xl p-5 border border-indigo-100 shadow-sm text-center">
+                            <p class="text-sm text-slate-500">Total Data Nilai</p>
+                            <p class="text-2xl font-bold text-blue-600">${nilaiList.length}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-600"></i>
+                                Distribusi Nilai
+                            </h3>
+                            <div class="space-y-3">
+                                ${ranges.map(r => {
+                                    const percent = nilaiList.length > 0 ? Math.round((r.count / nilaiList.length) * 100) : 0;
+                                    const colors = ['green', 'blue', 'yellow', 'orange', 'red'];
+                                    const idx = ranges.indexOf(r);
+                                    return `<div class="flex items-center gap-3">
+                                        <div class="w-24 text-sm">${r.label}</div>
+                                        <div class="flex-1">
+                                            <div class="bg-${colors[idx]}-100 rounded-full h-2 overflow-hidden">
+                                                <div class="bg-${colors[idx]}-500 h-full rounded-full transition-all" style="width:${percent}%"></div>
+                                            </div>
+                                        </div>
+                                        <p class="text-sm font-medium w-12 text-right">${r.count}</p>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                            <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-600"></i>
+                                Status Kelulusan Mahasiswa
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 text-center border border-green-200">
+                                    <p class="text-3xl font-bold text-green-700">${mahasiswa.filter(m => m.statusKelulusan === 'Lulus').length}</p>
+                                    <p class="text-xs text-green-600 mt-1">Lulus</p>
+                                </div>
+                                <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl p-4 text-center border border-yellow-200">
+                                    <p class="text-3xl font-bold text-yellow-700">${mahasiswa.filter(m => m.statusKelulusan === 'Belum Lulus').length}</p>
+                                    <p class="text-xs text-yellow-600 mt-1">Belum Lulus</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-xs text-slate-400 text-center">
+                                <i data-lucide="info" class="w-3 h-3 inline"></i> 
+                                Kelulusan: minimal 144 SKS dan IPK ≥ 2.0
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-indigo-100 p-5 shadow-sm">
+                        <h3 class="font-semibold mb-3 flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="w-5 h-5 text-indigo-600"></i>
+                            Rekap Nilai Mahasiswa
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead><tr><th>NIM</th><th>Nama</th><th>Jumlah MK</th><th>Rata-rata</th><th>IPK</th><th>SKS</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    ${mahasiswa.map(m => {
+                                        const nList = nilaiList.filter(n => n.mahasiswaId === m.__backendId);
+                                        const avg = nList.length > 0 ? nList.reduce((s,n) => s + calculateNilaiAkhir(n), 0) / nList.length : 0;
+                                        return `<tr>
+                                            <td>${m.nim}</td>
+                                            <td class="font-medium">${m.name}</td>
+                                            <td>${nList.length}</td>
+                                            <td>${avg.toFixed(1)}</td>
+                                            <td class="font-semibold text-indigo-600">${m.ipk ? m.ipk.toFixed(2) : '0.00'}</td>
+                                            <td>${m.totalSks || 0}</td>
+                                            <td><span class="badge-status ${m.statusKelulusan === 'Lulus' ? 'badge-lulus' : 'badge-tidak-lulus'}">${m.statusKelulusan}</span></td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Delete item
+        window.deleteItem = async (id) => { 
+            const r = allData.find(d => d.__backendId === id); 
+            if (r) {
+                if (r.type === 'mahasiswa') {
+                    if (!confirm('Menghapus mahasiswa akan menghapus semua data nilainya. Lanjutkan?')) return;
+                }
+                await deleteRecord(r); 
+                showToast('Data dihapus!'); 
+                renderPage(currentPage); 
+            }
+        };
+        
+        // Render Page
+        function renderPage(page) { 
+            const pages = { 
+                dashboard: renderDashboard, 
+                mahasiswa: renderMahasiswa, 
+                dosen: renderDosen, 
+                staf: renderStaf, 
+                matkul: renderMatkul, 
+                nilai: renderNilai, 
+                transkrip: renderTranskrip, 
+                'lap-nilai': renderLapNilai
+            }; 
+            if (pages[page]) pages[page](); 
+            else document.getElementById('content-area').innerHTML = '<p class="text-slate-400">Halaman tidak ditemukan.</p>'; 
+            lucide.createIcons(); 
+        }
+
+        // Init
+        initData();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
